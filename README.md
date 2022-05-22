@@ -13,3 +13,6 @@ project made with laravel/lumen and redis !
 3. POST /event
 	* Create or Deposit into an account
 		POST /event {"type":"deposit", "destination":"100", "amount":10}
+	
+	* Withdraw from existing account
+		POST /event {"type":"withdraw", "origin":"100", "amount":5}

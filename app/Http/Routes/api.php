@@ -9,7 +9,6 @@
 
 use \Illuminate\Http\Request;
 use \App\Http\Response\JSONResponse;
-use \App\Exceptions\ApiException;
 
 use \App\Http\Controllers\Accounts as AccountController;
 
@@ -54,6 +53,7 @@ $router->get('/balance', function (Request $request) use ($router) {
 $router->post('/event', function (Request $request) use ($router) {
     //REQUEST BODY
     $body = $request->JSON()->all();
+    $statusCode = 201;
 
     //VERIFICA TIPO DE AÇÃO A SER EXECUTADA EM CONTA
     switch ($body['type']) {
@@ -61,8 +61,18 @@ $router->post('/event', function (Request $request) use ($router) {
             $response = (new AccountController)->setRequest($request)
                                                ->deposit($body['destination'], $body['amount']);
             break;
+
+        case 'withdraw':
+            $response = (new AccountController)->setRequest($request)
+                                               ->withdraw($body['origin'], $body['amount']);
+            break;
+    }
+
+    //TRATA STATUS CODE PARA CONTA NÃO ENCONTRADA PARA WITHDRAW
+    if($response == 0){
+        $statusCode = 404;
     }
     
     //RESPONSE
-    return (new JSONResponse($response, 201));
+    return (new JSONResponse($response, $statusCode));
 });

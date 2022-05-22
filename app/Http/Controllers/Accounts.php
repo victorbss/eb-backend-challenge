@@ -70,4 +70,34 @@ class Accounts extends \App\Core\Api\ApiRequest{
         ];
     }
 
+    /**
+    * Método responsável por realizar saque em conta 
+    */
+    public function withdraw($accountId, $amount){
+        //REDIS
+        $redis = new Predis\Client();
+        $accounts = json_decode($redis->get('accounts'), true);
+
+        //VERIFICA SE CONTA EXISTE
+        foreach ($accounts as $k => $account) {
+            if($account['id'] == $accountId){
+                //SUBTRAI AMOUNT 
+                $accounts[$k]['balance'] -= $amount;
+                $account = $accounts[$k];
+
+                //ATUALIZA REDIS
+                $jsonAccounts = json_encode($accounts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                $redis->set('accounts', $jsonAccounts);
+
+                //RESPONSE
+                return [
+                    'origin' => $account
+                ];
+            }
+        }
+
+        //RESPONSE PARA CONTA NÃO ENCONTRADA
+        return 0;
+    }
+
 }
