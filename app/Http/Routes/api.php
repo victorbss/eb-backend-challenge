@@ -20,6 +20,7 @@ $router->post('/reset', function (Request $request) use ($router) {
     //RESETA REGISTRO DE CONTAS NO REDIS
     $redis = new Predis\Client();
     $redis->set('accounts', '{}');
+    //NGROK DONT serve HTML content, must sign up for an ngrok account and install authtoken. (ERR_NGROK_6022)
     return (new JSONResponse('OK', 200));
 });
 
