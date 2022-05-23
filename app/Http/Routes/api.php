@@ -28,22 +28,20 @@ $router->post('/reset', function (Request $request) use ($router) {
 * @author Victor Pereira
 */
 $router->get('/balance', function (Request $request) use ($router) {
-    //BUSCA REGISTRO DE CONTAS NO REDIS
-    $redis = new Predis\Client();
-    $accounts = json_decode($redis->get('accounts'), true);
-
     //QUERY PARAM
-    $searchId = $request->get('account_id');
+    $accountId = $request->get('account_id');
+    $statusCode = 200;
 
-    //CONSULTA SALDO DE CONTA EXISTENTE
-    foreach ($accounts as $account) {
-        if($account['id'] == $searchId){
-            return (new JSONResponse($account['balance'], 200));
-        }
+    $response = (new AccountController)->setRequest($request)
+                                       ->getBalance($accountId);
+    
+    //TRATA STATUS CODE PARA CONTA ORIGEM NÃO ENCONTRADA
+    if(empty($response)){
+        $statusCode = 404;
     }
     
-    //RESPONSE PARA CONTA NÃO EXISTENTE
-    return (new JSONResponse(0, 404));
+    //RESPONSE
+    return (new JSONResponse($response, $statusCode));
 });
 
 /**
@@ -73,8 +71,8 @@ $router->post('/event', function (Request $request) use ($router) {
             break;
     }
 
-    //TRATA STATUS CODE PARA CONTA NÃO ENCONTRADA PARA WITHDRAW
-    if($response == 0){
+    //TRATA STATUS CODE PARA CONTA ORIGEM NÃO ENCONTRADA
+    if(empty($response)){
         $statusCode = 404;
     }
     

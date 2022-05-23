@@ -16,6 +16,25 @@ use Predis;
 class Accounts extends \App\Core\Api\ApiRequest{
 
     /**
+    * Método responsável por consultar saldo em conta
+    */
+    public function getBalance($accountId){
+        //BUSCA REGISTRO DE CONTAS NO REDIS
+        $redis = new Predis\Client();
+        $accounts = json_decode($redis->get('accounts'), true);
+
+        //CONSULTA SALDO DE CONTA EXISTENTE
+        foreach ($accounts as $account) {
+            if($account['id'] == $accountId){
+                return $account['balance'];
+            }
+        }
+
+        //RESPONSE PARA CONTA NÃO ENCONTRADA
+        return 0;
+    }
+
+    /**
     * Método responsável por realizar depósito em conta ou cria nova conta com amount informado
     */
     public function deposit($accountId, $amount){
