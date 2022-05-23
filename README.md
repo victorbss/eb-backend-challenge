@@ -16,3 +16,6 @@ project made with laravel/lumen and redis !
 	
 	* Withdraw from existing account
 		POST /event {"type":"withdraw", "origin":"100", "amount":5}
+
+	* Transfer from existing account
+		POST /event {"type":"transfer", "origin":"100", "amount":15, "destination":"300"}

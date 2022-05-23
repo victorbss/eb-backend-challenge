@@ -46,6 +46,39 @@ class Accounts extends \App\Core\Api\ApiRequest{
     }
 
     /**
+    * Método responsável por realizar transferência para outra conta
+    */
+    public function transfer($originAccountId, $destinationAccountId, $amount){
+        //REDIS
+        $redis = new Predis\Client();
+        $accounts = json_decode($redis->get('accounts'), true);
+
+        //VERIFICA SE CONTA EXISTE
+        foreach ($accounts as $k => $account) {
+            if($account['id'] == $originAccountId){
+                //EXECUTA TRANSFERÊNCIA
+                $withdraw = $this->withdraw($originAccountId, $amount);
+                $deposit  = $this->deposit($destinationAccountId, $amount);
+
+                //RESPONSE NO SCHEMA ESPERADO
+                return [
+                    'origin'      => [
+                        'id'      => $withdraw['origin']['id'],
+                        'balance' => $withdraw['origin']['balance']
+                    ],
+                    'destination' => [
+                        'id'      => $deposit['destination']['id'],
+                        'balance' => $deposit['destination']['balance']
+                    ]
+                ];
+            }
+        }
+
+        //RESPONSE PARA CONTA NÃO ENCONTRADA
+        return 0;
+    }
+
+    /**
     * Método responsável por criar nova conta
     */
     public function newAccount($accountId, $amount){
@@ -82,7 +115,8 @@ class Accounts extends \App\Core\Api\ApiRequest{
         foreach ($accounts as $k => $account) {
             if($account['id'] == $accountId){
                 //SUBTRAI AMOUNT 
-                $accounts[$k]['balance'] -= $amount;
+                $balance = $accounts[$k]['balance'];
+                $accounts[$k]['balance'] -= ($amount > $balance ? $balance : $amount);
                 $account = $accounts[$k];
 
                 //ATUALIZA REDIS

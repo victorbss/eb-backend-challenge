@@ -66,6 +66,11 @@ $router->post('/event', function (Request $request) use ($router) {
             $response = (new AccountController)->setRequest($request)
                                                ->withdraw($body['origin'], $body['amount']);
             break;
+        
+        case 'transfer':
+            $response = (new AccountController)->setRequest($request)
+                                                ->transfer($body['origin'], $body['destination'], $body['amount']);
+            break;
     }
 
     //TRATA STATUS CODE PARA CONTA NÃO ENCONTRADA PARA WITHDRAW
